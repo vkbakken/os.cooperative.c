@@ -20,18 +20,18 @@ struct workq {
 
 
 #define WORKQ_DECLARE(__name__)       \
-                static struct workq k_##__name__
+                static struct workq wq_##__name__
 
 
 
-void workq_item_init(struct k_workq_item *w, void (*fun)(struct k_workq_item * work));
+void workq_item_init(struct workq_item *w, void (*fun)(struct workq_item * work));
 
-void workq_init(struct k_workq *q);
-bool workq_is_empty(struct k_workq *q);
-void workq_post(struct k_workq *q, struct k_workq_item *w);
-void workq_post_delayed(struct k_workq *q, struct k_workq_item *w, uint32_t dly);
-void workq_cancel(struct k_workq *q, struct k_workq_item *w);
+void workq_init(struct workq *q);
+bool workq_is_empty(struct workq *q);
+void workq_post(struct workq *q, struct workq_item *w);
+void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly);
+void workq_cancel(struct workq *q, struct workq_item *w);
 
 
-uint32_t workq_iterate(struct k_workq *q);
+uint32_t workq_iterate(struct workq *q);
 #endif /*WQUEUE_H_INCLUDED*/
