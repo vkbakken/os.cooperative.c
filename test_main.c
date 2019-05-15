@@ -3,7 +3,7 @@
 
 #include "workq.h"
 
-WORKQ_DECLARE(mainq);
+WORKQ_DECLARE(main);
 WORKQ_ITEM_DECLARE(item1);
 
 
@@ -15,8 +15,8 @@ void fun1(struct workq_item *itm)
 int main(void)
 {
   
-  #define WORKQ_DECLARE(__name__)       \
-                static struct workq wq_##__name__
+//  #define WORKQ_DECLARE(__name__)       \
+//                static struct workq wq_##__name__
 
   workq_init(&wq_main);
   workq_item_init(&wqi_item1, fun1);
