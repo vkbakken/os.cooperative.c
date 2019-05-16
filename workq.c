@@ -1,8 +1,12 @@
 #include "workq.h"
 #include "os_assert.h"
 
-void workq_init(struct workq *q){
+void workq_init(struct workq *q)
+{
+	__ASSERT(NULL != q);
 
+	q->start = NULL;
+	q->end = NULL;
 }
 
 void workq_item_init(struct workq_item *w,
@@ -30,7 +34,7 @@ void workq_post(struct workq *q, struct workq_item *w)
 
 	//TODO: where should insert the new item to?
 
-	// insert to the end of slist
+	// insert at the end of slist
 	if (workq_is_empty(q)) {
 		q->end = w;
 		q->start = q->end;
@@ -39,7 +43,7 @@ void workq_post(struct workq *q, struct workq_item *w)
 		q->end = w;
 	}
 
-	//insert to the start of slist
+	//insert at the start of slist
 //	w->next = q->start;
 //	q->start = w;
 }
@@ -58,15 +62,14 @@ void workq_cancel(struct workq *q, struct workq_item *w)
 	__ASSERT(NULL != w);
 
 	if (q->start == w) {
-		q->start = w;
+		q->start = w->next;
 	} else {
-		struct workq_item **iterator = &(q->start);
-		while ((*iterator) != NULL) {
+		for (struct workq_item **iterator = &(q->start); *iterator != NULL;
+				iterator = &(*iterator)->next) {
 			if ((*iterator)->next == w) {
 				(*iterator)->next = w->next;
 				break;
 			}
-			iterator = &(*iterator)->next;
 		}
 	}
 }
@@ -75,7 +78,12 @@ uint32_t workq_iterate(struct workq *q)
 {
 	__ASSERT(NULL != q);
 
-	struct workq_item **iterator = &(q->start);
+	for (struct workq_item *iterator = q->start; iterator != NULL; iterator =
+			iterator->next) {
+		__ASSERT(NULL != iterator->fun);
+
+		iterator->fun(iterator);
+	}
 
 	return 0;
 }
