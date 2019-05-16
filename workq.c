@@ -54,6 +54,19 @@ void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly)
 	__ASSERT(NULL != w);
 	__ASSERT(0 != dly);
 
+	if (q->start == w) {
+		q->start = w->next;
+	} else {
+		for (struct workq_item **iterator = &(q->start); *iterator != NULL;
+				iterator = &(*iterator)->next) {
+			if ((*iterator)->next == w) {
+				(*iterator)->next = w->next;
+				break;
+			}
+		}
+	}
+
+	//TODO: How can we add back the removed item to the workq ?
 }
 
 void workq_cancel(struct workq *q, struct workq_item *w)
