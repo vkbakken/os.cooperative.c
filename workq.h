@@ -1,8 +1,8 @@
 #ifndef WQUEUE_H_INCLUDED
 #define WQUEUE_H_INCLUDED
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 struct workq_item {
@@ -17,25 +17,23 @@ struct workq_item {
 struct workq {
 	struct workq_item *start;
 	struct workq_item *end;
-    //NOTE: add member timer for internal control
+	//NOTE: add member timer for internal control
 	uint32_t timer;
 };
 
-#define WORKQ_DECLARE(__name__)       \
-                static struct workq wq_##__name__ = { \
-				.start = NULL, \
-				.end = NULL \
-}
+#define WORKQ_DECLARE(__name__)           \
+	static struct workq wq_##__name__ = { \
+		.start = NULL,                    \
+		.end = NULL}
 
-#define WORKQ_ITEM_DECLARE(__name__)       \
-                static struct workq_item wqi_##__name__ = { \
-				.next = NULL, \
-				.fun = NULL, \
-				.time = 0 \
-}
+#define WORKQ_ITEM_DECLARE(__name__)            \
+	static struct workq_item wqi_##__name__ = { \
+		.next = NULL,                           \
+		.fun = NULL,                            \
+		.time = 0}
 
 void workq_item_init(struct workq_item *w,
-		void (*fun)(struct workq_item * work));
+	void (*fun)(struct workq_item *work));
 
 void workq_init(struct workq *q);
 
