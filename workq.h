@@ -9,11 +9,16 @@ struct workq_item {
 	struct workq_item *next;
 	void (*fun)(struct workq_item *work);
 	uint32_t time;
+	//NOTE: add switch for execute task 1 time
+	//NOTE: add member next_execute_time for internal control
+	uint32_t next_exec_time;
 };
 
 struct workq {
 	struct workq_item *start;
 	struct workq_item *end;
+    //NOTE: add member timer for internal control
+	uint32_t timer;
 };
 
 #define WORKQ_DECLARE(__name__)       \
@@ -45,4 +50,6 @@ void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly);
 void workq_cancel(struct workq *q, struct workq_item *w);
 
 uint32_t workq_iterate(struct workq *q);
+
+void workq_increase_tick(struct workq *q);
 #endif /*WQUEUE_H_INCLUDED*/

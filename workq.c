@@ -10,7 +10,7 @@ void workq_init(struct workq *q)
 }
 
 void workq_item_init(struct workq_item *w,
-		void (*fun)(struct workq_item * work))
+	void (*fun)(struct workq_item *work))
 {
 	__ASSERT(NULL != w);
 	__ASSERT(NULL != fun);
@@ -44,29 +44,51 @@ void workq_post(struct workq *q, struct workq_item *w)
 	}
 
 	//insert at the start of slist
-//	w->next = q->start;
-//	q->start = w;
+	//	w->next = q->start;
+	//	q->start = w;
 }
 
 void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly)
 {
-	__ASSERT(NULL != q);
-	__ASSERT(NULL != w);
-	__ASSERT(0 != dly);
-
-	if (q->start == w) {
-		q->start = w->next;
-	} else {
-		for (struct workq_item **iterator = &(q->start); *iterator != NULL;
-				iterator = &(*iterator)->next) {
-			if ((*iterator)->next == w) {
-				(*iterator)->next = w->next;
-				break;
-			}
-		}
-	}
+	//	__ASSERT(NULL != q);
+	//	__ASSERT(NULL != w);
+	//	__ASSERT(0 != dly);
+	//
+	//	if (q->start == w) {
+	//		q->start = w->next;
+	//	} else {
+	//		for (struct workq_item **iterator = &(q->start); *iterator != NULL;
+	//			 iterator = &(*iterator)->next) {
+	//			if ((*iterator)->next == w) {
+	//				(*iterator)->next = w->next;
+	//				break;
+	//			}
+	//		}
+	//	}
 
 	//TODO: How can we add back the removed item to the workq ?
+
+	__ASSERT(NULL != q);
+	__ASSERT(NULL != w);
+
+	//TODO: where should insert the new item to?
+
+	// insert at the end of slist
+	if (workq_is_empty(q)) {
+		q->end = w;
+		q->start = q->end;
+	} else {
+		q->end->next = w;
+		q->end = w;
+	}
+
+	//insert at the start of slist
+	//	w->next = q->start;
+	//	q->start = w;
+
+	w->time = dly;
+	//update next execution time for current item
+	w->next_exec_time = q->timer + w->time;
 }
 
 void workq_cancel(struct workq *q, struct workq_item *w)
@@ -78,7 +100,7 @@ void workq_cancel(struct workq *q, struct workq_item *w)
 		q->start = w->next;
 	} else {
 		for (struct workq_item **iterator = &(q->start); *iterator != NULL;
-				iterator = &(*iterator)->next) {
+			 iterator = &(*iterator)->next) {
 			if ((*iterator)->next == w) {
 				(*iterator)->next = w->next;
 				break;
@@ -91,12 +113,24 @@ uint32_t workq_iterate(struct workq *q)
 {
 	__ASSERT(NULL != q);
 
-	for (struct workq_item *iterator = q->start; iterator != NULL; iterator =
-			iterator->next) {
-		__ASSERT(NULL != iterator->fun);
+	for (struct workq_item *iterator = q->start; iterator != NULL;
+		 iterator = iterator->next) {
+		if (q->timer >= iterator->next_exec_time) {
+			__ASSERT(NULL != iterator->fun);
 
-		iterator->fun(iterator);
+			//update next execution time for current item
+			iterator->next_exec_time = q->timer + iterator->time;
+			//execute item's task
+			iterator->fun(iterator);
+		}
 	}
 
 	return 0;
+}
+
+void workq_increase_tick(struct workq *q)
+{
+	__ASSERT(NULL != q);
+
+	++q->timer;
 }
