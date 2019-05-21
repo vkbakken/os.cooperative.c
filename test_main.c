@@ -12,20 +12,28 @@ WORKQ_ITEM_DECLARE(item3);
 
 void fun1(struct workq_item *item)
 {
-	func_call[0]++;
+	if (++func_call[0] >= 4000) {
+		workq_cancel(&wq_main, item);
+//		workq_cancel(&wq_main, &wqi_item3);
+//		workq_cancel(&wq_main, &wqi_item2);
+	}
 }
 
 void fun2(struct workq_item *item)
 {
-	func_call[1]++;
+	if (++func_call[1] >= 2000) {
+		workq_cancel(&wq_main, item);
+//		workq_cancel(&wq_main, &wqi_item3);
+//		workq_cancel(&wq_main, &wqi_item1);
+	}
 }
 
 void fun3(struct workq_item *item)
 {
 	if (++func_call[2] >= 1000) {
 		workq_cancel(&wq_main, item);
-		workq_cancel(&wq_main, &wqi_item1);
-		workq_cancel(&wq_main, &wqi_item2);
+//		workq_cancel(&wq_main, &wqi_item1);
+//		workq_cancel(&wq_main, &wqi_item2);
 	}
 }
 
@@ -36,9 +44,11 @@ int test_workq(void)
 //                static struct workq wq_##__name__
 
 	workq_init(&wq_main);
+
 	workq_item_init(&wqi_item1, fun1);
 	workq_item_init(&wqi_item2, fun2);
 	workq_item_init(&wqi_item3, fun3);
+
 	workq_post_delayed(&wq_main, &wqi_item1, 1000);
 	workq_post_delayed(&wq_main, &wqi_item2, 2500);
 	workq_post_delayed(&wq_main, &wqi_item3, 3000);

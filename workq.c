@@ -35,17 +35,17 @@ void workq_post(struct workq *q, struct workq_item *w)
 	//TODO: where should insert the new item to?
 
 	// insert at the end of slist
-	if (workq_is_empty(q)) {
-		q->end = w;
-		q->start = q->end;
-	} else {
-		q->end->next = w;
-		q->end = w;
-	}
+	//	if (workq_is_empty(q)) {
+	//		q->end = w;
+	//		q->start = q->end;
+	//	} else {
+	//		q->end->next = w;
+	//		q->end = w;
+	//	}
 
 	//insert at the start of slist
-	//	w->next = q->start;
-	//	q->start = w;
+	w->next = q->start;
+	q->start = w;
 }
 
 void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly)
@@ -74,17 +74,17 @@ void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly)
 	//TODO: where should insert the new item to?
 
 	// insert at the end of slist
-	if (workq_is_empty(q)) {
-		q->end = w;
-		q->start = q->end;
-	} else {
-		q->end->next = w;
-		q->end = w;
-	}
+	//	if (workq_is_empty(q)) {
+	//		q->end = w;
+	//		q->start = q->end;
+	//	} else {
+	//		q->end->next = w;
+	//		q->end = w;
+	//	}
 
 	//insert at the start of slist
-	//	w->next = q->start;
-	//	q->start = w;
+	w->next = q->start;
+	q->start = w;
 
 	w->time = dly;
 	//update next execution time for current item
@@ -99,7 +99,8 @@ void workq_cancel(struct workq *q, struct workq_item *w)
 	if (q->start == w) {
 		q->start = w->next;
 	} else {
-		for (struct workq_item **iterator = &(q->start); *iterator != NULL;
+		for (struct workq_item **iterator = &(q->start);
+			 iterator != NULL & *iterator != NULL;
 			 iterator = &(*iterator)->next) {
 			if ((*iterator)->next == w) {
 				(*iterator)->next = w->next;
@@ -113,15 +114,17 @@ uint32_t workq_iterate(struct workq *q)
 {
 	__ASSERT(NULL != q);
 
-	for (struct workq_item *iterator = q->start; iterator != NULL;
-		 iterator = iterator->next) {
-		if (q->timer >= iterator->next_exec_time) {
-			__ASSERT(NULL != iterator->fun);
+	for (struct workq_item **iterator = &(q->start);
+		 iterator != NULL & *iterator != NULL;
+		 iterator = &(*iterator)->next) {
+
+		if (q->timer >= (*iterator)->next_exec_time) {
+			__ASSERT(NULL != (*iterator)->fun);
 
 			//update next execution time for current item
-			iterator->next_exec_time = q->timer + iterator->time;
+			(*iterator)->next_exec_time = q->timer + (*iterator)->time;
 			//execute item's task
-			iterator->fun(iterator);
+			(*iterator)->fun(*iterator);
 		}
 	}
 
