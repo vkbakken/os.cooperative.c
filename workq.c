@@ -48,7 +48,7 @@ void workq_post(struct workq *q, struct workq_item *w)
 	q->start = w;
 }
 
-void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly)
+void workq_post_delayed(struct workq *q, struct workq_item *w, WQ_TICK_TYPE dly)
 {
 	//	__ASSERT(NULL != q);
 	//	__ASSERT(NULL != w);
@@ -102,6 +102,7 @@ void workq_cancel(struct workq *q, struct workq_item *w)
 		for (struct workq_item **iterator = &(q->start);
 			 iterator != NULL & *iterator != NULL;
 			 iterator = &(*iterator)->next) {
+
 			if ((*iterator)->next == w) {
 				(*iterator)->next = w->next;
 				break;
@@ -113,16 +114,23 @@ void workq_cancel(struct workq *q, struct workq_item *w)
 uint32_t workq_iterate(struct workq *q)
 {
 	__ASSERT(NULL != q);
+	WQ_TICK_TYPE tmp;
 
 	for (struct workq_item **iterator = &(q->start);
 		 iterator != NULL & *iterator != NULL;
 		 iterator = &(*iterator)->next) {
 
-		if (q->timer >= (*iterator)->next_exec_time) {
+		if (!(*iterator)->sq_delayed &
+			q->timer >= (*iterator)->next_exec_time) {
 			__ASSERT(NULL != (*iterator)->fun);
 
 			//update next execution time for current item
-			(*iterator)->next_exec_time = q->timer + (*iterator)->time;
+			tmp = q->timer + (*iterator)->time;
+			if (q->timer >= tmp) {
+				(*iterator)->sq_delayed = true;
+			}
+			(*iterator)->next_exec_time = tmp;
+
 			//execute item's task
 			(*iterator)->fun(*iterator);
 		}
@@ -135,5 +143,17 @@ void workq_increase_tick(struct workq *q)
 {
 	__ASSERT(NULL != q);
 
-	++q->timer;
+	WQ_TICK_TYPE tmp = q->timer++;
+
+	if (q->timer < tmp) {
+		for (struct workq_item **iterator = &(q->start);
+			 iterator != NULL & *iterator != NULL;
+			 iterator = &(*iterator)->next) {
+
+			if ((*iterator)->sq_delayed) {
+				(*iterator)->sq_delayed = false;
+			}
+		}
+	}
+	//	++q->timer;
 }

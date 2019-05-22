@@ -52,6 +52,7 @@ int test_workq(void)
 	workq_post_delayed(&wq_main, &wqi_item1, 1000);
 	workq_post_delayed(&wq_main, &wqi_item2, 2500);
 	workq_post_delayed(&wq_main, &wqi_item3, 3000);
+
 	while (1) {
 		if (workq_iterate(&wq_main) == 0) {
 			//Sleep
