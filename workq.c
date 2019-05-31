@@ -10,7 +10,6 @@
 static inline uint32_t workq_get_min(struct workq *q)
 {
 	uint32_t min_var = 0;
-	struct workq_item *tmp;
 
 	if (q->start == NULL) {
 		return min_var;
@@ -111,8 +110,8 @@ uint32_t workq_iterate(struct workq *q, uint32_t current_time)
 		 iterator != NULL;
 		 iterator = iterator->next) {
 
-		if (!iterator->postponed &
-			current_time >= iterator->next_exec_time) {
+		if ((!iterator->postponed) &
+			(current_time >= iterator->next_exec_time)) {
 			__ASSERT(NULL != iterator->fun);
 
 			//execute item's task
