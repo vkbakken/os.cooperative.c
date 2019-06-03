@@ -5,8 +5,8 @@
 #include "testcase1.h"
 
 static unsigned int func_call[3];
-static volatile uint32_t tick;
-static int test_index = -1;
+static volatile uint32_t tick, next_execute_time, next_execute_time_last;
+static int test_index = -1, test_slice_index = -1;
 static int test_done = 0;
 static int test_passed = 0;
 
@@ -73,23 +73,43 @@ int main(void)
 	workq_post_delayed(&wq_main, &wqi_item3, 2000);
 
 	while (test_done < 3) {
-		if (workq_iterate(&wq_main, tick) == 0) {
-			//Sleep
+		next_execute_time = workq_iterate(&wq_main, tick);
+
+		if (next_execute_time == 0) {
+			/* Put system into sleep mode */
+		} else if (next_execute_time - tick <= 3) {
+			/* within critical range, 2 solution:
+			 * 1. execute iterate right now
+			 * 2. re-assign next_execute_time = tick + 3
+			 * */
+		} else {
+			/* set next wake up time then put system into sleep mode */
+			if (next_execute_time_last != next_execute_time) {
+				next_execute_time_last = next_execute_time;
+				if (expect_32_time_slice[++test_slice_index]
+						!= next_execute_time_last) {
+					printf("Time slice failed: executed at %d instead of %d, index: %d\n\r",
+							next_execute_time_last,
+							expect_32_time_slice[test_slice_index],
+							test_slice_index);
+				}
+			}
 		}
-		uint32_t tmp = tick++;
-		if (tick < tmp) {
-			workq_time_overflowed(&wq_main);
-		}
+
+		tick++;
 	}
 
-	int result = (int)(TEST_SIZE - test_passed);
+	int result = (int) (TEST_SIZE - test_passed);
 
-	if(0 == result)
-		printf("Test passed: %d/%d tasks passed!\r\n", test_passed, TEST_SIZE);
+	if (0 == result)
+		printf("Test order passed: %d/%d tasks passed!\n\r", test_passed,
+		TEST_SIZE);
 	else
-		printf("Test-failed: %d/%d tasks passed!\r\n", test_passed, TEST_SIZE);
+		printf("Test order failed: %d/%d tasks passed!\n\r", test_passed,
+		TEST_SIZE);
 
-	printf("Task executed in wrong order: %d tasks!\r\n", TEST_SIZE - test_passed);
+	printf("Tasks executed in wrong order: %d tasks!\n\r",
+	TEST_SIZE - test_passed);
 
 	return result;
 }

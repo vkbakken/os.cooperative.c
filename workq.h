@@ -11,10 +11,7 @@ struct workq_item {
 	struct workq_item *next;
 	void (*fun)(struct workq_item *work);
 	uint32_t time;
-	//NOTE: add switch for execute task 1 time
-	//NOTE: add member next_execute_time for internal control
 	uint32_t next_exec_time;
-    bool postponed;
 };
 
 struct workq {
@@ -49,8 +46,4 @@ void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly);
 void workq_cancel(struct workq *q, struct workq_item *w);
 
 uint32_t workq_iterate(struct workq *q, uint32_t current_time);
-
-void workq_time_overflowed(struct workq *q);
-
-void workq_increase_tick(struct workq *q);
 #endif /*WQUEUE_H_INCLUDED*/
