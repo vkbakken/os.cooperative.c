@@ -73,7 +73,9 @@ int main(void)
 	workq_post_delayed(&wq_main, &wqi_item3, 2000);
 
 	while (test_done < 3) {
-		next_execute_time = workq_iterate(&wq_main, tick);
+		if(next_execute_time == tick){
+			next_execute_time = workq_iterate(&wq_main, tick);
+		}
 
 		if (next_execute_time == 0) {
 			/* Put system into sleep mode */
