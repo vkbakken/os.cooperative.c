@@ -37,13 +37,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: test-travis
+all: os-cooperative-c
 
 # Tool invocations
-test-travis: $(OBJS) $(USER_OBJS)
+os-cooperative-c: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++  -o "test-travis" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "os-cooperative-c" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 #	@./test-travis
 	@echo ' '
