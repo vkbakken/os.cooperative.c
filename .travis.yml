@@ -12,5 +12,6 @@ notifications:
     recipients:
       - liemle@mpire.vn
       - dole@mpire.vn
+      - fastbakken@gmail.com
     on_success: always # default: change
     on_failure: change # default: always
