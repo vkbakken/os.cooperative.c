@@ -9,4 +9,8 @@ script:
 
 notifications:
   email:
-    - dole@mpire.vn
+    recipients:
+      - liemle@mpire.vn
+      - dole@mpire.vn
+    on_success: always # default: change
+    on_failure: change # default: always
