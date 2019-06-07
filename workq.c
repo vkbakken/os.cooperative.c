@@ -11,11 +11,7 @@ static inline uint32_t workq_get_min(struct workq *q)
 {
 	uint32_t min_var = 0;
 
-	if (q->start == NULL) {
-		return min_var;
-	} else {
-		min_var = q->start->next_exec_time;
-	}
+	min_var = q->start->next_exec_time;
 
 	for (struct workq_item *iterator = q->start; iterator != NULL; iterator =
 			iterator->next) {
@@ -114,5 +110,8 @@ uint32_t workq_iterate(struct workq *q, uint32_t current_time)
 	}
 
 	//find the next execution time
-	return workq_get_min(q);
+	if (NULL != q->start)
+		return (workq_get_min(q) - current_time);
+	else
+		return 0;
 }

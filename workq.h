@@ -46,4 +46,5 @@ void workq_post_delayed(struct workq *q, struct workq_item *w, uint32_t dly);
 void workq_cancel(struct workq *q, struct workq_item *w);
 
 uint32_t workq_iterate(struct workq *q, uint32_t current_time);
+
 #endif /*WQUEUE_H_INCLUDED*/
