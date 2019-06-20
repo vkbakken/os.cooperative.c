@@ -26,7 +26,7 @@ void fun1(struct workq_item *item)
 		workq_cancel(&wq_main, item);
 		++test_done;
 	} else {
-		//		printf("%d,\n", 1);
+//				printf("%d,\n", 1);
 		if (1 == expect_result[++test_index]) {
 			++test_passed;
 		} else {
@@ -42,7 +42,7 @@ void fun2(struct workq_item *item)
 		workq_cancel(&wq_main, item);
 		++test_done;
 	} else {
-		//		printf("%d,\n", 2);
+//				printf("%d,\n", 2);
 		if (2 == expect_result[++test_index]) {
 			++test_passed;
 		} else {
@@ -58,7 +58,7 @@ void fun3(struct workq_item *item)
 		workq_cancel(&wq_main, item);
 		++test_done;
 	} else {
-		//		printf("%d,\n", 3);
+//				printf("%d,\n", 3);
 		if (3 == expect_result[++test_index]) {
 			++test_passed;
 		} else {
@@ -76,9 +76,9 @@ int main(void)
 	workq_item_init(&wqi_item2, fun2);
 	workq_item_init(&wqi_item3, fun3);
 
-	workq_post_delayed(&wq_main, &wqi_item1, 3277);
-	workq_post_delayed(&wq_main, &wqi_item2, 1000);
-	workq_post_delayed(&wq_main, &wqi_item3, 1003);
+	workq_post_delayed(&wq_main, &wqi_item1, 3277, rtc_get_tick());
+	workq_post_delayed(&wq_main, &wqi_item2, 1000, rtc_get_tick());
+	workq_post_delayed(&wq_main, &wqi_item3, 1003, rtc_get_tick());
 
 	while (test_done < 3) {
 		if (next_execute_time == tick) {
@@ -120,13 +120,13 @@ void timing_handler(void)
 		 * 1. execute iterate right now - using this solution.
 		 * 2. re-assign next_execute_time = tick + 3
 		 * */
-		printf("Dead zone detected, index: %d\n", test_index);
+		printf("Dead zone detected, index: %d\n", test_index + 1);
 		timing_handler();
 	}
 
 	if (next_execute_time_last != next_execute_time) {
 		next_execute_time_last = next_execute_time;
-		//					printf("%d,\n",next_execute_time_last);
+//							printf("%d,\n",next_execute_time_last);
 		if (expect_32_time_slice[++test_slice_index] != next_execute_time_last) {
 			++timing_failure;
 			printf("Time slice failed: executed at %d instead of %d, index: %d\n\r",
